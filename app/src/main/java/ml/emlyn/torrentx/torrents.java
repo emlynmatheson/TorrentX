@@ -14,7 +14,13 @@ import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert;
 import com.frostwire.jlibtorrent.Entry;
 import com.frostwire.jlibtorrent.swig.settings_pack;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Timer;
@@ -26,23 +32,53 @@ public class torrents {
 
     private final static String TAG = "ml.emlyn.torrentx.tag";
 
-    //Format: {{REQ_TYPE, API_URL}, ...}
-    private final String[][] VidApiList  = new String[][]{
-            {"GET", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=201"},
-            {"GET", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=205"}
+    //Format: {{API, API_URL}, ...}
+    private static final String[][] VidApiList  = new String[][]{
+            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=201"},
+            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=205"}
     };
-    private final String[][] MusicApiList = new String[][]{};
-    private final String[][] BookApiList  = new String[][]{{}, {}};
+    private static final String[][] MusicApiList = new String[][]{};
+    private static final String[][] BookApiList  = new String[][]{{}, {}};
 
-    public static String[][] searchTorrent(String name) {
+    public static String[][] searchTorrent(String name, String cat) {
 
         //Search by name and return String[][]
-        //Sample return: [[{NAME}, {MAGNET URL/FILE}], [{NAME}, {MAGNET URL/FILE}]]
+        //Sample return: [[{NAME}, {MAGNET URL}], [{NAME}, {MAGNET URL}]]
 
         ArrayList<String[]> results = new ArrayList<>();
 
-        //TODO: Use tracker APIs to get mag. uri or .torrent
-        results.add(new String[]{"a", "b"});
+        switch (cat) {
+            case "video": {
+                for (String[] apiUrl : VidApiList) {
+                    if (apiUrl[0].equals("TPB")) {
+                        String searchQ = apiUrl[1].replace("{SEARCH_Q}", name);
+                        Document searchResDoc = null;
+                        try {
+                            searchResDoc = Jsoup.connect(searchQ).get();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                        Elements nameElems = searchResDoc.select(".item-name > a");
+                        Elements urlElems = searchResDoc.select(".list-entry > .item-icons > a");
+
+                        for (int i=0; i<Math.min(nameElems.size(), urlElems.size()); i++) {
+                            Log.d(TAG, "Name is: " + nameElems.text());
+                            Log.d(TAG, "Url is: " + urlElems.attr("href"));
+                            results.add(new String[]{nameElems.text(), urlElems.attr("href")});
+                        }
+                    }
+                }
+            }
+
+            case "music": {
+
+            }
+
+            case "audio": {
+
+            }
+        }
 
         return results.toArray(new String[0][0]);
 

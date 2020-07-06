@@ -95,7 +95,7 @@ public class VideoFragment extends Fragment {
 
         ((LinearLayout) requireActivity().findViewById(R.id.vid_dl_ll)).removeAllViews();
 
-        String[][] searchRes = torrents.searchTorrent(((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString());
+        String[][] searchRes = torrents.searchTorrent(((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString(), "video");
 
         for (String[] res : searchRes) {
             createEntry(res[0], requireActivity().findViewById(R.id.vid_dl_ll));
