@@ -16,13 +16,11 @@ import com.frostwire.jlibtorrent.swig.settings_pack;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 import java.util.TimerTask;
@@ -35,10 +33,14 @@ public class torrents {
     //Format: {{API, API_URL}, ...}
     private static final String[][] VidApiList  = new String[][]{
             {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=201"},
-            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=205"}
+            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=205"},
     };
-    private static final String[][] MusicApiList = new String[][]{};
-    private static final String[][] BookApiList  = new String[][]{{}, {}};
+    private static final String[][] MusicApiList = new String[][]{
+            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=101"},
+    };
+    private static final String[][] BookApiList  = new String[][]{
+            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=601"},
+    };
 
     public static String[][] searchTorrent(String name, String cat) {
 
@@ -46,42 +48,59 @@ public class torrents {
         //Sample return: [[{NAME}, {MAGNET URL}], [{NAME}, {MAGNET URL}]]
 
         ArrayList<String[]> results = new ArrayList<>();
+        Document searchResDoc;
 
         switch (cat) {
             case "video": {
                 for (String[] apiUrl : VidApiList) {
                     if (apiUrl[0].equals("TPB")) {
-                        String searchQ = apiUrl[1].replace("{SEARCH_Q}", name);
-                        Document searchResDoc = null;
-                        try {
-                            searchResDoc = Jsoup.connect(searchQ).get();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                        Elements nameElems = searchResDoc.select(".item-name > a");
-                        Elements urlElems = searchResDoc.select(".list-entry > .item-icons > a");
-
-                        for (int i=0; i<Math.min(nameElems.size(), urlElems.size()); i++) {
-                            Log.d(TAG, "Name is: " + nameElems.text());
-                            Log.d(TAG, "Url is: " + urlElems.attr("href"));
-                            results.add(new String[]{nameElems.text(), urlElems.attr("href")});
-                        }
+                        results = parseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
                     }
                 }
             }
 
             case "music": {
-
+                for (String[] apiUrl : MusicApiList) {
+                    if (apiUrl[0].equals("TPB")) {
+                        results = parseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
+                    }
+                }
             }
 
-            case "audio": {
-
+            case "books": {
+                for (String[] apiUrl : BookApiList) {
+                    if (apiUrl[0].equals("TPB")) {
+                        results = parseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
+                    }
+                }
             }
         }
 
         return results.toArray(new String[0][0]);
 
+    }
+
+    private static ArrayList<String[]> parseTPB(String searchQ) {
+        ArrayList<String[]> results = new ArrayList<>();
+        Document searchResDoc;
+
+        try {
+            searchResDoc = Jsoup.connect(searchQ).get();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        Elements nameElems = searchResDoc.select(".item-name > a");
+        Elements urlElems = searchResDoc.select(".list-entry > .item-icons > a");
+
+        for (int i=0; i<Math.min(nameElems.size(), urlElems.size()); i++) {
+            Log.d(TAG, "Name is: " + nameElems.text());
+            Log.d(TAG, "Url is: " + urlElems.attr("href"));
+            results.add(new String[]{nameElems.text(), urlElems.attr("href")});
+        }
+
+        return results;
     }
 
     public static void getFromTorr(String torrFile) throws InterruptedException {
