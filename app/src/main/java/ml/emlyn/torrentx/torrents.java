@@ -54,7 +54,7 @@ public class torrents {
             case "video": {
                 for (String[] apiUrl : VidApiList) {
                     if (apiUrl[0].equals("TPB")) {
-                        results = parseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
+                        results = getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
                     }
                 }
             }
@@ -62,7 +62,7 @@ public class torrents {
             case "music": {
                 for (String[] apiUrl : MusicApiList) {
                     if (apiUrl[0].equals("TPB")) {
-                        results = parseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
+                        results = getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
                     }
                 }
             }
@@ -70,7 +70,7 @@ public class torrents {
             case "books": {
                 for (String[] apiUrl : BookApiList) {
                     if (apiUrl[0].equals("TPB")) {
-                        results = parseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
+                        results = getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
                     }
                 }
             }
@@ -80,7 +80,7 @@ public class torrents {
 
     }
 
-    private static ArrayList<String[]> parseTPB(String searchQ) {
+    private static ArrayList<String[]> getAndParseTPB(String searchQ) {
         ArrayList<String[]> results = new ArrayList<>();
         Document searchResDoc;
 
