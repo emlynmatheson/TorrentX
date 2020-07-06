@@ -25,7 +25,14 @@ import java.util.concurrent.TimeUnit;
 public class torrents {
 
     private final static String TAG = "ml.emlyn.torrentx.tag";
-    private final String[] TRACKERS = new String[]{};
+
+    //Format: {{REQ_TYPE, API_URL}, ...}
+    private final String[][] VidApiList  = new String[][]{
+            {"GET", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=201"},
+            {"GET", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=205"}
+    };
+    private final String[][] MusicApiList = new String[][]{};
+    private final String[][] BookApiList  = new String[][]{{}, {}};
 
     public static String[][] searchTorrent(String name) {
 
