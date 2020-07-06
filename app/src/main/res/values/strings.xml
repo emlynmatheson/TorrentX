@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">TorrentX</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">TorrentX</string>
+    <string name="nav_header_subtitle">Emlyn Matheson</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_video">Video</string>
+    <string name="menu_music">Music</string>
+    <string name="menu_books">Books</string>
+
+    <string name="dl_sec_title">Download</string>
+    <string name="pl_sec_title">Play</string>
+    <string name="rd_sec_title">Read</string>
+
+    <string name="file_name">{Name of file}</string>
+    <string name="file_loc">{File Location}</string>
+</resources>
