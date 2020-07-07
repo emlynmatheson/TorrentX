@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Objects;
 
 import ml.emlyn.torrentx.R;
@@ -106,9 +107,10 @@ public class VideoFragment extends Fragment {
         ((LinearLayout) requireActivity().findViewById(R.id.vid_dl_ll)).removeAllViews();
 
         new Thread(() -> torrents.searchTorrent(((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString(), "video", requireActivity(), searchRes -> {
-            for (String[] res : searchRes) {
-                createEntry(res[0], res[2], res[1], requireActivity().findViewById(R.id.vid_dl_ll));
-                Log.d(TAG, "Created");
+            Log.d(TAG, Arrays.deepToString(searchRes));
+            for (int i=0; i<searchRes.length; i++) {
+                String[] res = searchRes[i];
+                createEntry(res[0], i, res[2], res[1], requireActivity().findViewById(R.id.vid_dl_ll));
             }
         })).start();
     }
@@ -140,16 +142,16 @@ public class VideoFragment extends Fragment {
         Objects.requireNonNull(imm).hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    private void createEntry(String name, String magUri, String size, ViewGroup root) {
+    private void createEntry(String name, int i, String magUri, String size, ViewGroup root) {
         View newEntry = this.inflater.inflate(R.layout.layout_entry, root);
 
-        ((TextView) newEntry.findViewById(R.id.enNameTv)).setText(name);
+        ((TextView) ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(1)).setText(name);
         if (Long.parseLong(size) >= 1073741824) {
-            ((TextView) newEntry.findViewById(R.id.enSizeTv)).setText(getString(R.string.size_gb, String.valueOf(Long.parseLong(size) / 1073741824)));
+            ((TextView) ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(2)).setText(getString(R.string.size_gb, String.valueOf(Long.parseLong(size) / 1073741824)));
         } else if (Long.parseLong(size) >= 1048576) {
-            ((TextView) newEntry.findViewById(R.id.enSizeTv)).setText(getString(R.string.size_mb, String.valueOf(Long.parseLong(size) / 1048576)));
+            ((TextView) ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(2)).setText(getString(R.string.size_mb, String.valueOf(Long.parseLong(size) / 1048576)));
         } else {
-            ((TextView) newEntry.findViewById(R.id.enSizeTv)).setText(getString(R.string.size_kb, String.valueOf(Long.parseLong(size) / 1024)));
+            ((TextView) ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(2)).setText(getString(R.string.size_kb, String.valueOf(Long.parseLong(size) / 1024)));
         }
 
         //TODO: Download shit
