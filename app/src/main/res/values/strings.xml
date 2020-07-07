@@ -16,5 +16,7 @@
     <string name="rd_sec_title">Read</string>
 
     <string name="file_name">{Name of file}</string>
-    <string name="file_loc">{File Location}</string>
+    <string name="size_gb">%1$s GB</string>
+    <string name="size_mb">%1$s MB</string>
+    <string name="size_kb">%1$s kB</string>
 </resources>

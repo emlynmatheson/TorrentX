@@ -1,6 +1,9 @@
 package ml.emlyn.torrentx;
 
+import android.app.Activity;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.frostwire.jlibtorrent.AlertListener;
 import com.frostwire.jlibtorrent.SessionManager;
@@ -14,17 +17,21 @@ import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert;
 import com.frostwire.jlibtorrent.Entry;
 import com.frostwire.jlibtorrent.swig.settings_pack;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class torrents {
 
@@ -32,29 +39,32 @@ public class torrents {
 
     //Format: {{API, API_URL}, ...}
     private static final String[][] VidApiList  = new String[][]{
-            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=201"},
-            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=205"},
+            {"TPB", "https://apibay.org/q.php?q={SEARCH_Q}&cat=201"},
+            {"TPB", "https://apibay.org/q.php?q={SEARCH_Q}&cat=205"},
     };
     private static final String[][] MusicApiList = new String[][]{
-            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=101"},
+            {"TPB", "https://apibay.org/q.php?q={SEARCH_Q}&cat=101"},
     };
     private static final String[][] BookApiList  = new String[][]{
-            {"TPB", "https://thepiratebay.org/search.php?q={SEARCH_Q}&cat=601"},
+            {"TPB", "https://apibay.org/q.php?q={SEARCH_Q}&cat=601"},
     };
 
-    public static String[][] searchTorrent(String name, String cat) {
+    private static final String tbpTrackerSuffix = "&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2920%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce";
+
+
+    public static void searchTorrent(String name, String cat, Activity activity, Consumer<String[][]> onComplete) {
 
         //Search by name and return String[][]
-        //Sample return: [[{NAME}, {MAGNET URL}], [{NAME}, {MAGNET URL}]]
+        //Sample return: [[{NAME}, {DATE}, {MAGNET URL}], [{NAME}, {DATE}, {MAGNET URL}]]
 
         ArrayList<String[]> results = new ArrayList<>();
-        Document searchResDoc;
+        Log.d(TAG, "started search");
 
         switch (cat) {
             case "video": {
                 for (String[] apiUrl : VidApiList) {
                     if (apiUrl[0].equals("TPB")) {
-                        results = getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
+                        results.addAll(getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name)));
                     }
                 }
             }
@@ -62,7 +72,7 @@ public class torrents {
             case "music": {
                 for (String[] apiUrl : MusicApiList) {
                     if (apiUrl[0].equals("TPB")) {
-                        results = getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
+                        results.addAll(getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name)));
                     }
                 }
             }
@@ -70,35 +80,37 @@ public class torrents {
             case "books": {
                 for (String[] apiUrl : BookApiList) {
                     if (apiUrl[0].equals("TPB")) {
-                        results = getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name));
+                        results.addAll(getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name)));
                     }
                 }
             }
         }
 
-        return results.toArray(new String[0][0]);
-
+        final String[][] res = results.toArray(new String[0][0]);
+        activity.runOnUiThread(() -> onComplete.accept(res));
     }
 
+    @NonNull
     private static ArrayList<String[]> getAndParseTPB(String searchQ) {
         ArrayList<String[]> results = new ArrayList<>();
-        Document searchResDoc;
+        JSONArray res = null;
 
         try {
-            searchResDoc = Jsoup.connect(searchQ).get();
-        } catch (IOException e) {
+            res = new JSONArray(Jsoup.connect(searchQ).ignoreContentType(true).execute().body());
+        } catch (JSONException | IOException e) {
             e.printStackTrace();
-            return null;
         }
+            for (int i=0; i<res.length(); i++) {
+                try {
+                    if (Integer.parseInt(res.getJSONObject(i).getString("seeders")) <= 0) { continue; }
+                    String magUri = "magnet:?xt=urn:bith:" + res.getJSONObject(i).getString("info_hash")+"&dn="+ URLEncoder.encode(res.getJSONObject(i).getString("name"), StandardCharsets.UTF_8.toString()) + tbpTrackerSuffix;
+                    results.add(new String[]{res.getJSONObject(i).getString("name"), res.getJSONObject(i).getString("size"), magUri});
+                } catch (JSONException | UnsupportedEncodingException e) {
+                    Log.e(TAG, String.valueOf(e));
+                    e.printStackTrace();
+                }
+            }
 
-        Elements nameElems = searchResDoc.select(".item-name > a");
-        Elements urlElems = searchResDoc.select(".list-entry > .item-icons > a");
-
-        for (int i=0; i<Math.min(nameElems.size(), urlElems.size()); i++) {
-            Log.d(TAG, "Name is: " + nameElems.text());
-            Log.d(TAG, "Url is: " + urlElems.attr("href"));
-            results.add(new String[]{nameElems.text(), urlElems.attr("href")});
-        }
 
         return results;
     }

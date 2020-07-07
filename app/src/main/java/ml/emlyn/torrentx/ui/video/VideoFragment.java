@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,10 +19,11 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.math.BigInteger;
 import java.util.Objects;
 
 import ml.emlyn.torrentx.R;
-import ml.emlyn.torrentx.torrents;;
+import ml.emlyn.torrentx.torrents;
 
 public class VideoFragment extends Fragment {
 
@@ -34,7 +36,7 @@ public class VideoFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
 
         this.inflater = inflater;
-        return inflater.inflate(R.layout.fragment_video, container,false);
+        return inflater.inflate(R.layout.fragment_video, container, false);
 
     }
 
@@ -48,7 +50,9 @@ public class VideoFragment extends Fragment {
                         case R.id.download_menu: {
                             //Replace UI with download menu
 
-                            if (currScreen == 0) { return true; }
+                            if (currScreen == 0) {
+                                return true;
+                            }
 
                             ((EditText) requireActivity().findViewById(R.id.vid_dl_search_bar)).setText("");
                             requireActivity().findViewById(R.id.vid_dl_search).setOnClickListener(this::dlSearchBtnOnClick);
@@ -61,7 +65,9 @@ public class VideoFragment extends Fragment {
                         case R.id.open_menu: {
                             //Replace UI with open menu
 
-                            if (currScreen == 1) { return true; }
+                            if (currScreen == 1) {
+                                return true;
+                            }
 
                             ((EditText) requireActivity().findViewById(R.id.vid_dl_search_bar)).setText("");
                             requireActivity().findViewById(R.id.vid_dl_search).setOnClickListener(this::opSearchBtnOnClick);
@@ -81,8 +87,12 @@ public class VideoFragment extends Fragment {
         EditText searchEdit = requireView().findViewById(R.id.vid_dl_search_bar);
         searchEdit.setOnKeyListener((v, keyCode, event) -> {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                if (currScreen == 0) { dlSearchBtnOnClick(v); }
-                if (currScreen == 1) { opSearchBtnOnClick(v); }
+                if (currScreen == 0) {
+                    dlSearchBtnOnClick(v);
+                }
+                if (currScreen == 1) {
+                    opSearchBtnOnClick(v);
+                }
                 return true;
             }
             return false;
@@ -95,11 +105,12 @@ public class VideoFragment extends Fragment {
 
         ((LinearLayout) requireActivity().findViewById(R.id.vid_dl_ll)).removeAllViews();
 
-        String[][] searchRes = torrents.searchTorrent(((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString(), "video");
-
-        for (String[] res : searchRes) {
-            createEntry(res[0], requireActivity().findViewById(R.id.vid_dl_ll));
-        }
+        new Thread(() -> torrents.searchTorrent(((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString(), "video", requireActivity(), searchRes -> {
+            for (String[] res : searchRes) {
+                createEntry(res[0], res[2], res[1], requireActivity().findViewById(R.id.vid_dl_ll));
+                Log.d(TAG, "Created");
+            }
+        })).start();
     }
 
     public void dlSearchBtnOnClick(View v) {
@@ -129,13 +140,20 @@ public class VideoFragment extends Fragment {
         Objects.requireNonNull(imm).hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    private View createEntry(String name, ViewGroup root) {
+    private void createEntry(String name, String magUri, String size, ViewGroup root) {
         View newEntry = this.inflater.inflate(R.layout.layout_entry, root);
 
-        //TODO: UI Shit
-        //TODO: Download shit
+        ((TextView) newEntry.findViewById(R.id.enNameTv)).setText(name);
+        if (Long.parseLong(size) >= 1073741824) {
+            ((TextView) newEntry.findViewById(R.id.enSizeTv)).setText(getString(R.string.size_gb, String.valueOf(Long.parseLong(size) / 1073741824)));
+        } else if (Long.parseLong(size) >= 1048576) {
+            ((TextView) newEntry.findViewById(R.id.enSizeTv)).setText(getString(R.string.size_mb, String.valueOf(Long.parseLong(size) / 1048576)));
+        } else {
+            ((TextView) newEntry.findViewById(R.id.enSizeTv)).setText(getString(R.string.size_kb, String.valueOf(Long.parseLong(size) / 1024)));
+        }
 
-        return newEntry;
+        //TODO: Download shit
     }
 
+    //Threading helpers
 }
