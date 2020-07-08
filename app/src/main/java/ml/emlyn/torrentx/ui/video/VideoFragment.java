@@ -157,9 +157,9 @@ public class VideoFragment extends Fragment {
         ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(0).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, String.valueOf(v.getTag(R.id.currDlState)));
                 if (v.getTag(R.id.currDlState) == "true") {
-                    //TODO: Cancel UI thread
+                    //TODO: Cancel dl thread
+
                     ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(0);
                     v.setAlpha(1);
 

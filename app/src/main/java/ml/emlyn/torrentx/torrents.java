@@ -2,7 +2,6 @@ package ml.emlyn.torrentx;
 
 import android.app.Activity;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -56,7 +55,7 @@ public class torrents {
     public static void searchTorrent(String name, String cat, Activity activity, Consumer<String[][]> onComplete) {
 
         //Search by name and return String[][]
-        //Sample return: [[{NAME}, {DATE}, {MAGNET URL}], [{NAME}, {DATE}, {MAGNET URL}]]
+        //Sample return: [[{NAME}, {SIZE}, {MAGNET URL}], [{NAME}, {SIZE}, {MAGNET URL}]]
 
         ArrayList<String[]> results = new ArrayList<>();
 
@@ -67,6 +66,7 @@ public class torrents {
                         results.addAll(getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name)));
                     }
                 }
+                break;
             }
 
             case "music": {
@@ -75,6 +75,7 @@ public class torrents {
                         results.addAll(getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name)));
                     }
                 }
+                break;
             }
 
             case "books": {
@@ -83,6 +84,7 @@ public class torrents {
                         results.addAll(getAndParseTPB(apiUrl[1].replace("{SEARCH_Q}", name)));
                     }
                 }
+                break;
             }
         }
 
