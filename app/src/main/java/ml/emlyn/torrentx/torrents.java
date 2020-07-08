@@ -2,6 +2,7 @@ package ml.emlyn.torrentx;
 
 import android.app.Activity;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -58,7 +59,6 @@ public class torrents {
         //Sample return: [[{NAME}, {DATE}, {MAGNET URL}], [{NAME}, {DATE}, {MAGNET URL}]]
 
         ArrayList<String[]> results = new ArrayList<>();
-        Log.d(TAG, "started search");
 
         switch (cat) {
             case "video": {

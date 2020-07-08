@@ -1,5 +1,6 @@
 package ml.emlyn.torrentx.ui.video;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -19,12 +20,12 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Objects;
 
 import ml.emlyn.torrentx.R;
 import ml.emlyn.torrentx.torrents;
+
+import static android.view.View.*;
 
 public class VideoFragment extends Fragment {
 
@@ -107,7 +108,6 @@ public class VideoFragment extends Fragment {
         ((LinearLayout) requireActivity().findViewById(R.id.vid_dl_ll)).removeAllViews();
 
         new Thread(() -> torrents.searchTorrent(((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString(), "video", requireActivity(), searchRes -> {
-            Log.d(TAG, Arrays.deepToString(searchRes));
             for (int i=0; i<searchRes.length; i++) {
                 String[] res = searchRes[i];
                 createEntry(res[0], i, res[2], res[1], requireActivity().findViewById(R.id.vid_dl_ll));
@@ -154,8 +154,26 @@ public class VideoFragment extends Fragment {
             ((TextView) ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(2)).setText(getString(R.string.size_kb, String.valueOf(Long.parseLong(size) / 1024)));
         }
 
-        //TODO: Download shit
+        ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(0).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, String.valueOf(v.getTag(R.id.currDlState)));
+                if (v.getTag(R.id.currDlState) == "true") {
+                    //TODO: Cancel UI thread
+                    ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(0);
+                    v.setAlpha(1);
+
+                    v.setTag(R.id.currDlState, "false");
+                } else {
+                    //TODO: Create dl thread
+
+                    ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(1);
+                    v.setAlpha(0);
+
+                    v.setTag(R.id.currDlState, "true");
+                }
+            }
+        });
     }
 
-    //Threading helpers
 }
