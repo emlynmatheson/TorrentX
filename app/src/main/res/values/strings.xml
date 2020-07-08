@@ -19,4 +19,6 @@
     <string name="size_gb">%1$s GB</string>
     <string name="size_mb">%1$s MB</string>
     <string name="size_kb">%1$s kB</string>
+
+    <string name="no_res_found">No results found</string>
 </resources>

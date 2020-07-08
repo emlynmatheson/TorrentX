@@ -106,8 +106,15 @@ public class VideoFragment extends Fragment {
     private void dlUpdateSearchRes() {
 
         ((LinearLayout) requireActivity().findViewById(R.id.vid_dl_ll)).removeAllViews();
+        requireActivity().findViewById(R.id.vidNoResFoundIV).setVisibility(INVISIBLE);
+        requireActivity().findViewById(R.id.vidNoResFoundTV).setVisibility(INVISIBLE);
 
         new Thread(() -> torrents.searchTorrent(((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString(), "video", requireActivity(), searchRes -> {
+            if (searchRes.length == 0) {
+                requireActivity().findViewById(R.id.vidNoResFoundIV).setVisibility(VISIBLE);
+                requireActivity().findViewById(R.id.vidNoResFoundTV).setVisibility(VISIBLE);
+            }
+
             for (int i=0; i<searchRes.length; i++) {
                 String[] res = searchRes[i];
                 createEntry(res[0], i, res[2], res[1], requireActivity().findViewById(R.id.vid_dl_ll));
