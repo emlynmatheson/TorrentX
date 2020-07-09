@@ -58,7 +58,10 @@ public class VideoFragment extends Fragment {
 
                             ((EditText) requireActivity().findViewById(R.id.vid_dl_search_bar)).setText("");
                             requireActivity().findViewById(R.id.vid_dl_search).setOnClickListener(this::dlSearchBtnOnClick);
-                            dlSearchBtnOnClick(getView());
+
+                            ((LinearLayout) requireActivity().findViewById(R.id.vid_dl_ll)).removeAllViews();
+                            requireActivity().findViewById(R.id.vidNoResFoundIV).setVisibility(INVISIBLE);
+                            requireActivity().findViewById(R.id.vidNoResFoundTV).setVisibility(INVISIBLE);
 
                             currScreen = 0;
                             return true;
@@ -73,7 +76,8 @@ public class VideoFragment extends Fragment {
 
                             ((EditText) requireActivity().findViewById(R.id.vid_dl_search_bar)).setText("");
                             requireActivity().findViewById(R.id.vid_dl_search).setOnClickListener(this::opSearchBtnOnClick);
-                            opSearchBtnOnClick(getView());
+
+                            //TODO: Play screen wiping
 
                             currScreen = 1;
                             return true;
@@ -110,7 +114,7 @@ public class VideoFragment extends Fragment {
         requireActivity().findViewById(R.id.vidNoResFoundTV).setVisibility(INVISIBLE);
 
         new Thread(() -> torrents.searchTorrent(((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString(), "video", requireActivity(), searchRes -> {
-            if (searchRes.length == 0) {
+            if (searchRes.length == 0 && !((EditText) requireView().findViewById(R.id.vid_dl_search_bar)).getText().toString().equals("")) {
                 requireActivity().findViewById(R.id.vidNoResFoundIV).setVisibility(VISIBLE);
                 requireActivity().findViewById(R.id.vidNoResFoundTV).setVisibility(VISIBLE);
             }
