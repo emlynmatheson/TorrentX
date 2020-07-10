@@ -2,32 +2,100 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/book_ct"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.books.BooksFragment">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_tmp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#00ff00ff"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/book_dl_search_bar"
+        android:layout_width="335dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:autofillHints=""
+        android:hint="@android:string/search_go"
+        android:inputType="text"
+        android:maxLines="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_tmp" />
+
+    <ImageButton
+        android:id="@+id/book_dl_search"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginEnd="24dp"
+        android:background="#00FFFFFF"
+        android:contentDescription="@android:string/search_go"
+        android:onClick="dlSearchBtnOnClick"
+        android:src="@android:drawable/ic_menu_search"
+        app:layout_constraintBottom_toBottomOf="@id/book_dl_search_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/book_dl_search_bar"
+        app:layout_constraintTop_toTopOf="@id/book_dl_search_bar" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/bt_nav_book"
+        app:layout_constraintEnd_toEndOf="@+id/book_dl_search"
+        app:layout_constraintStart_toStartOf="@+id/book_dl_search_bar"
+        app:layout_constraintTop_toBottomOf="@+id/book_dl_search_bar">
+
+        <LinearLayout
+            android:id="@+id/book_dl_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="24dp"
+            android:orientation="vertical"/>
+    </ScrollView>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bt_nav_vid"
+        android:id="@+id/bt_nav_book"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_navigation_menu" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/bookNoResFoundIV"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:contentDescription="@string/no_res_found"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/stat_sys_warning" />
+
+    <TextView
+        android:id="@+id/bookNoResFoundTV"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="4dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@android:drawable/ic_menu_add"
-        app:maxImageSize="36dp"
-        app:backgroundTint="#E94A4A4A"
-        app:layout_constraintBottom_toTopOf="@+id/bt_nav_vid"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:text="@string/no_res_found"
+        android:textAlignment="center"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/bookNoResFoundIV"
+        app:layout_constraintStart_toStartOf="@+id/bookNoResFoundIV"
+        app:layout_constraintTop_toBottomOf="@+id/bookNoResFoundIV" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

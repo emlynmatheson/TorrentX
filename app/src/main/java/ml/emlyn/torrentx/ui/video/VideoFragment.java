@@ -77,7 +77,7 @@ public class VideoFragment extends Fragment {
                             ((EditText) requireActivity().findViewById(R.id.vid_dl_search_bar)).setText("");
                             requireActivity().findViewById(R.id.vid_dl_search).setOnClickListener(this::opSearchBtnOnClick);
 
-                            //TODO: Play screen wiping
+                            //TODO: wipe play screen
 
                             currScreen = 1;
                             return true;
