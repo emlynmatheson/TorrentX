@@ -1,10 +1,8 @@
 package ml.emlyn.torrentx.ui.video;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,8 +26,6 @@ import ml.emlyn.torrentx.torrents;
 import static android.view.View.*;
 
 public class VideoFragment extends Fragment {
-
-    private String TAG = "ml.emlyn.torrentx.tag";
 
     private int currScreen = 0; //0: Download, 1: Open
     private LayoutInflater inflater;
@@ -165,24 +161,21 @@ public class VideoFragment extends Fragment {
             ((TextView) ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(2)).setText(getString(R.string.size_kb, String.valueOf(Long.parseLong(size) / 1024)));
         }
 
-        ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(0).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (v.getTag(R.id.currDlState) == "true") {
-                    //TODO: Cancel dl thread
+        ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(0).setOnClickListener(v -> {
+            if (v.getTag(R.id.currDlState) == "true") {
+                //TODO: Cancel dl thread
 
-                    ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(0);
-                    v.setAlpha(1);
+                ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(0);
+                v.setAlpha(1);
 
-                    v.setTag(R.id.currDlState, "false");
-                } else {
-                    //TODO: Create dl thread
+                v.setTag(R.id.currDlState, "false");
+            } else {
+                //TODO: Create dl thread
 
-                    ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(1);
-                    v.setAlpha(0);
+                ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(1);
+                v.setAlpha(0);
 
-                    v.setTag(R.id.currDlState, "true");
-                }
+                v.setTag(R.id.currDlState, "true");
             }
         });
     }
