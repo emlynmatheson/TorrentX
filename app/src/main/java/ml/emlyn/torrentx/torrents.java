@@ -163,7 +163,7 @@ public class torrents {
         s.stop();
     }
 
-    public static Entry getTorrFromMag(String magUri) throws Throwable {
+    public static void getTorrFromMag(String magUri, Activity activity, Consumer<Entry> onComplete) {
 
         final SessionManager s = new SessionManager();
 
@@ -197,7 +197,12 @@ public class torrents {
         }, 0, 1000);
 
         //Wait for DHT Nodes
-        boolean r = signal.await(40, TimeUnit.SECONDS);
+        boolean r = false;
+        try {
+            r = signal.await(40, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (!r) {
             //DHT Bootstrap timeout
             System.exit(0);
@@ -207,14 +212,7 @@ public class torrents {
         byte[] data = s.fetchMagnet(magUri, 30);
         s.stop();
 
-        if (data != null) {
-            return Entry.bdecode(data);
-        } else {
-            //Magnet return failed
-            //Show error in UI
-        }
-
-        return null;
+        activity.runOnUiThread(() -> onComplete.accept(Entry.bdecode(data)));
     }
 }
 

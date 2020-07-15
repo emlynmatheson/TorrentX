@@ -16,9 +16,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.frostwire.jlibtorrent.Entry;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import ml.emlyn.torrentx.R;
 import ml.emlyn.torrentx.torrents;
@@ -162,20 +164,25 @@ public class VideoFragment extends Fragment {
         }
 
         ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(0).setOnClickListener(v -> {
-            if (v.getTag(R.id.currDlState) == "true") {
-                //TODO: Cancel dl thread
+            if (v.getTag(R.id.currDlThread) != "null") {
+                ((Thread) v.getTag(R.id.currDlThread)).interrupt();
+
+                v.setTag(R.id.currDlThread, "null");
 
                 ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(0);
                 v.setAlpha(1);
-
-                v.setTag(R.id.currDlState, "false");
             } else {
-                //TODO: Create dl thread
+                Thread dlThread = new Thread(() -> torrents.getTorrFromMag(magUri, requireActivity(), new Consumer<Entry>() {
+                    @Override
+                    public void accept(Entry entry) {
+                        //TODO: Something or other idek
+                    }
+                }));
+
+                v.setTag(R.id.currDlThread, dlThread);
 
                 ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(1);
                 v.setAlpha(0);
-
-                v.setTag(R.id.currDlState, "true");
             }
         });
     }

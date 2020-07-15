@@ -19,8 +19,8 @@
         app:layout_constraintTop_toTopOf="@+id/enNameTv"
         app:srcCompat="@android:drawable/stat_sys_download">
         <tag
-            android:id="@+id/currDlState"
-            android:value="false"/>
+            android:id="@+id/currDlThread"
+            android:value="null"/>
 
     </ImageButton>
 
