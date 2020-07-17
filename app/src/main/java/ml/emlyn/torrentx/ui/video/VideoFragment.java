@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.frostwire.jlibtorrent.Entry;
+import com.frostwire.jlibtorrent.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Objects;
@@ -172,10 +173,12 @@ public class VideoFragment extends Fragment {
                 ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(0);
                 v.setAlpha(1);
             } else {
-                Thread dlThread = new Thread(() -> torrents.getTorrFromMag(magUri, requireActivity(), new Consumer<Entry>() {
+                Thread dlThread = new Thread(() -> torrents.getTorrFromMag(magUri, new SessionManager(), requireActivity(), new Consumer<Byte[]>() {
                     @Override
-                    public void accept(Entry entry) {
-                        //TODO: Something or other idek
+                    public void accept(Byte[] res) {
+
+
+                        ((ViewGroup) v.getParent()).removeView(v);
                     }
                 }));
 

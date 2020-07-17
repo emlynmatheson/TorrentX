@@ -15,6 +15,8 @@ import com.frostwire.jlibtorrent.alerts.Alert;
 import com.frostwire.jlibtorrent.alerts.AlertType;
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert;
 import com.frostwire.jlibtorrent.Entry;
+import com.frostwire.jlibtorrent.alerts.PieceFinishedAlert;
+import com.frostwire.jlibtorrent.alerts.TorrentFinishedAlert;
 import com.frostwire.jlibtorrent.swig.settings_pack;
 
 import org.json.JSONArray;
@@ -163,56 +165,98 @@ public class torrents {
         s.stop();
     }
 
-    public static void getTorrFromMag(String magUri, Activity activity, Consumer<Entry> onComplete) {
+    public static void getTorrFromMag(String link, SessionManager s, Activity activity, Consumer<Byte[]> onComplete) {
+        File saveDir = new File("torrents/");
+        if (!saveDir.exists()) {
+            saveDir.mkdirs();
+        }
+        AlertListener l = new AlertListener() {
+            private int grade = 0;
 
-        final SessionManager s = new SessionManager();
-
-        SettingsPack sp = new SettingsPack();
-        //sp.listenInterfaces("0.0.0.0:43567");
-        //sp.listenInterfaces("[::]:43567");
-        sp.listenInterfaces("0.0.0.0:43567,[::]:43567");
-        //sp.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(), "router.silotis.us:6881");
-        //sp.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(), "router.bittorrent.com:6881");
-        sp.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(), "dht.transmissionbt.com:6881");
-
-        //TODO: Figure out which configs work (1 in 9)
-
-        SessionParams params = new SessionParams(sp);
-
-        s.start(params);
-
-        final CountDownLatch signal = new CountDownLatch(1);
-
-        final Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
             @Override
-            public void run() {
-                long nodes = s.stats().dhtNodes();
-                // wait for at least 10 nodes in the DHT.
-                if (nodes >= 10) {
-                    signal.countDown();
-                    timer.cancel();
+            public int[] types() {
+                return null;
+            }
+
+            @Override
+            public void alert(Alert<?> alert) {
+                AlertType type = alert.type();
+                switch (type) {
+                    case ADD_TORRENT:
+                        //((AddTorrentAlert) alert).handle().setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD);
+                        ((AddTorrentAlert) alert).handle().resume();
+                        break;
+                    case PIECE_FINISHED:
+                        int progress = (int) (((PieceFinishedAlert) alert).handle().status().progress() * 100);
+                        if (grade < progress / 20) {
+                            int index = (int) (((PieceFinishedAlert) alert).pieceIndex());
+                            grade += 1;
+                            s.downloadRate();
+                        }
+                        break;
+                    case TORRENT_FINISHED:
+                        grade = 0;
+                        ((TorrentFinishedAlert) alert).handle().pause();
+                        break;
+                    case TORRENT_ERROR:
+                        //TODO: Show some UI error
+                        break;
+                    case BLOCK_FINISHED:
+                        progress = (int) (((BlockFinishedAlert) alert).handle().status().progress() * 100);
+                        if (grade < progress / 20) {
+                            int index = (int) (((BlockFinishedAlert) alert).pieceIndex());
+                            grade += 1;
+                            s.downloadRate();
+                        }
+                        break;
+                    case DHT_ERROR:
+                        //TODO: Show some error
+                        break;
+                    default:
+                        break;
                 }
             }
-        }, 0, 1000);
+        };
+        s.addListener(l);
+        if (!s.isRunning())
+            s.start();
+        if (link.startsWith("magnet:?")) {
+            final CountDownLatch signal = new CountDownLatch(1);
 
-        //Wait for DHT Nodes
-        boolean r = false;
-        try {
-            r = signal.await(40, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            final Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    long nodes = s.stats().dhtNodes();
+                    if (nodes >= 10) {
+                        signal.countDown();
+                        timer.cancel();
+                    }
+                }
+            }, 0, 1000);
+
+            boolean r = false;
+            try {
+                r = signal.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (!r) {
+                System.exit(0);
+            }
+            byte[] data = s.fetchMagnet(link, 30);
+            TorrentInfo ti = TorrentInfo.bdecode(data);
+            s.download(ti, saveDir);
+            int i = 0;
+            while (i < 20) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                i++;
+            }
         }
-        if (!r) {
-            //DHT Bootstrap timeout
-            System.exit(0);
-        }
-
-        //Fetching
-        byte[] data = s.fetchMagnet(magUri, 30);
-        s.stop();
-
-        activity.runOnUiThread(() -> onComplete.accept(Entry.bdecode(data)));
     }
 }
 

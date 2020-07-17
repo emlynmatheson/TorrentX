@@ -163,20 +163,20 @@ public class MusicFragment extends Fragment {
         }
 
         ((ViewGroup) ((ViewGroup) newEntry).getChildAt(i)).getChildAt(0).setOnClickListener(v -> {
-            if (v.getTag(R.id.currDlState) == "true") {
+            if (v.getTag(R.id.currDlThread) == "true") {
                 //TODO: Cancel dl thread
 
                 ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(0);
                 v.setAlpha(1);
 
-                v.setTag(R.id.currDlState, "false");
+                v.setTag(R.id.currDlThread, "false");
             } else {
                 //TODO: Create dl thread
 
                 ((ViewGroup) v.getParent()).getChildAt(3).setAlpha(1);
                 v.setAlpha(0);
 
-                v.setTag(R.id.currDlState, "true");
+                v.setTag(R.id.currDlThread, "true");
             }
         });
     }
